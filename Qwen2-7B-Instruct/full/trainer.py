@@ -13,20 +13,14 @@ class FinetuneArguments:
 
 # 用于处理数据的函数
 def process_func(example):
-    MAX_LENGTH = 128  # 最大长度，适应中文分词
     input_ids, attention_mask, labels = [], [], []
     instruction = tokenizer(
-        "\n".join(["<|im_start|>system", "现在你要扮演皇帝身边的女人--甄嬛.<|im_end|>" + "\n<|im_start|>user\n" + example["instruction"] + example["input"] + "<|im_end|>\n"]).strip(),
-        add_special_tokens=False
+        "<|im_start|>system\n"+"现在你要扮演皇帝身边的女人--甄嬛.<|im_end|>\n" + "<|im_start|>user\n" + example["instruction"] + "<|im_end|>\n",
     )
-    response = tokenizer("<|im_start|>assistant\n" + example["output"] + "<|im_end|>\n", add_special_tokens=False)
-    input_ids = instruction["input_ids"] + response["input_ids"] + [tokenizer.pad_token_id]
-    attention_mask = instruction["attention_mask"] + response["attention_mask"] + [1]
-    labels = [-100] * len(instruction["input_ids"]) + response["input_ids"] + [tokenizer.pad_token_id]
-    if len(input_ids) > MAX_LENGTH:
-        input_ids = input_ids[:MAX_LENGTH]
-        attention_mask = attention_mask[:MAX_LENGTH]
-        labels = labels[:MAX_LENGTH]
+    response = tokenizer("<|im_start|>assistant\n" + example["output"] + "<|im_end|>\n")
+    input_ids = instruction["input_ids"] + response["input_ids"]
+    attention_mask = instruction["attention_mask"] + response["attention_mask"]
+    labels = [-100] * len(instruction["input_ids"]) + response["input_ids"]
     return {
         "input_ids": input_ids,
         "attention_mask": attention_mask,
@@ -67,7 +61,3 @@ if __name__ == "__main__":
         data_collator=DataCollatorForSeq2Seq(tokenizer=tokenizer, padding=True),
     )
     trainer.train()  # 开始训练
-
-    # 测试模型
-    # response, history = model.chat(tokenizer, "你是谁", history=[], system="现在你要扮演皇帝身边的女人--甄嬛.")
-    # print(response)

@@ -30,7 +30,7 @@
     "steps_per_print": 1,
     "checkpoint": {
         "enabled": true,
-        "save_optimizer_states": false, 
-        "save_lr_scheduler": false       
+        "save_optimizer_states": true,  
+        "save_lr_scheduler": true       
     }
 }
